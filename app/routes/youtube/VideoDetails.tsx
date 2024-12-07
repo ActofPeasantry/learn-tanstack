@@ -10,7 +10,6 @@ async function fetchDetails() {
   const response = await fetch(
     `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${VIDEO_ID}&key=${API_KEY}`
   );
-
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
@@ -35,7 +34,7 @@ async function fetchDetails() {
 export const Route = createFileRoute("/youtube/VideoDetails")({
   component: VideoDetails,
 });
-function VideoDetails() {
+export function VideoDetails() {
   const router = useRouter();
   // Use the explicit type for the query result
   const { data, isLoading, error } = useQuery({
@@ -47,7 +46,7 @@ function VideoDetails() {
   if (error instanceof Error) return <div>Error: {error.message}</div>;
   return (
     <div>
-      <h3>{data?.title}</h3>
+      <h3>Title : {data?.title}</h3>
       <img src={data?.thumbnail} alt={data?.title} />
       <p>Published on: {data?.publishedAt}</p>
     </div>
