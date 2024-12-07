@@ -2,14 +2,13 @@ import { useState } from "react";
 import * as fs from "node:fs";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // ROUTING-----------------------
 const filePath = "youtube.txt";
 async function readYoutube() {
-  return await fs.promises.readFile(filePath, "utf-8").catch(() => {
-    throw new Error("Failed to read file");
-  });
+  const url = await fs.promises.readFile(filePath, "utf-8");
+  return url.trim();
 }
 
 // Server function to read the file content
@@ -29,10 +28,14 @@ const getYoutube = createServerFn({ method: "GET" }).handler(() => {
 });
 
 const updateURL = createServerFn({ method: "POST" })
-  .validator((d: string) => d)
+  .validator((data: string) => {
+    if (!data.trim()) {
+      throw new Error("URL cannot be empty");
+    }
+    return data;
+  })
   .handler(async ({ data }) => {
-    await readYoutube();
-    await fs.promises.writeFile(filePath, `${data}`);
+    await fs.promises.writeFile(filePath, data.trim(), "utf-8");
   });
 
 export const Route = createFileRoute("/youtube/")({
@@ -81,21 +84,25 @@ async function fetchDetails() {
 function Youtube() {
   const router = useRouter();
   const state = Route.useLoaderData();
-  const [inputURL, setInputURL] = useState("");
 
-  const handleURL = () => {
-    const newURL = inputURL;
-    updateURL({ data: newURL }).then(() => {
-      setInputURL("");
-      router.invalidate();
-    });
-    return console.log(inputURL);
-  };
-
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ["videoDetails"],
     queryFn: fetchDetails,
   });
+
+  const mutation = useMutation({
+    mutationFn: updateURL,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["videoDetails"] });
+    },
+  });
+
+  const [inputURL, setInputURL] = useState("");
+  const handleURL = () => {
+    mutation.mutate({ data: inputURL }); // Send new URL to server
+    setInputURL(""); // Clear input field
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error instanceof Error) return <div>Error: {error.message}</div>;
