@@ -1,15 +1,10 @@
-import { useState } from "react";
 import * as fs from "node:fs";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createServerFn } from "@tanstack/start";
+import { useState } from "react";
 
 // ROUTING-----------------------
 const filePath = "youtube.txt";
-async function readYoutube() {
-  const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
-  return url.trim();
-}
 
 // Server function to read the file content
 const getYoutubeURL = createServerFn({
@@ -19,36 +14,18 @@ const getYoutubeURL = createServerFn({
     const url = await fs.promises.readFile(filePath, "utf-8");
     return url.trim(); // Trim whitespace for clean URLs
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error as NodeJS.ErrnoException).code === "ENOENT"
-    ) {
-      // Fallback URL if the file doesn't exist
-      return "https://www.youtube.com/watch?v=zRs58D34OLY";
-    }
-    throw new Error("An unexpected error occurred while reading youtube.txt");
+    throw new Error("Failed to read youtube.txt");
   }
 });
 
-const getYoutube = createServerFn({ method: "GET" }).handler(() => {
-  return readYoutube();
-});
-
-const updateURL = createServerFn({ method: "POST" })
-  .validator((data: string) => {
+const updateURL = createServerFn({ method: "POST" }).validator(
+  (data: string) => {
     if (!data.trim()) {
       throw new Error("URL cannot be empty");
     }
     return data;
-  })
-  .handler(async ({ data }) => {
-    await fs.promises.writeFile(filePath, data.trim(), "utf-8");
-  });
-
-export const Route = createFileRoute("/youtube/")({
-  component: Youtube,
-  loader: async () => await getYoutube(),
-});
+  }
+);
 
 //API FETCHING-----------------
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
@@ -87,54 +64,20 @@ async function fetchDetails() {
   };
 }
 
-// RENDERING
-function Youtube() {
-  const router = useRouter();
-  const state = Route.useLoaderData();
-
+export function VideoDetails() {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ["videoDetails"],
     queryFn: fetchDetails,
   });
 
-  const mutation = useMutation({
-    mutationFn: updateURL,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["videoDetails"] });
-    },
-  });
-
-  const [inputURL, setInputURL] = useState("");
-  const handleURL = () => {
-    mutation.mutate({ data: inputURL }); // Send new URL to server
-    setInputURL(""); // Clear input field
-  };
-
   if (isLoading) return <div>Loading...</div>;
   if (error instanceof Error) return <div>Error: {error.message}</div>;
-
   return (
-    <>
-      <div>
-        <button type="button" onClick={handleURL}>
-          Enter
-        </button>
-        <input
-          className="input"
-          type="text"
-          value={inputURL}
-          onChange={(e) => setInputURL(e.target.value)}
-          placeholder="Enter URL"
-        />
-      </div>
-      <br />
-      <div>
-        <h3>Title : {data?.title}</h3>
-        <img src={data?.thumbnail} alt={data?.title} />
-        <p>Published on: {data?.publishedAt}</p>
-      </div>
-    </>
+    <div>
+      <h3>Title : {data?.title}</h3>
+      <img src={data?.thumbnail} alt={data?.title} />
+      <p>Published on: {data?.publishedAt}</p>
+    </div>
   );
 }
-export default Youtube;

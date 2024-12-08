@@ -13,7 +13,6 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as YoutubeIndexImport } from './routes/youtube/index'
-import { Route as YoutubeVideoDetailsImport } from './routes/youtube/VideoDetails'
 
 // Create/Update Routes
 
@@ -29,12 +28,6 @@ const YoutubeIndexRoute = YoutubeIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const YoutubeVideoDetailsRoute = YoutubeVideoDetailsImport.update({
-  id: '/youtube/VideoDetails',
-  path: '/youtube/VideoDetails',
-  getParentRoute: () => rootRoute,
-} as any)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -44,13 +37,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/youtube/VideoDetails': {
-      id: '/youtube/VideoDetails'
-      path: '/youtube/VideoDetails'
-      fullPath: '/youtube/VideoDetails'
-      preLoaderRoute: typeof YoutubeVideoDetailsImport
       parentRoute: typeof rootRoute
     }
     '/youtube/': {
@@ -67,41 +53,36 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/youtube/VideoDetails': typeof YoutubeVideoDetailsRoute
   '/youtube': typeof YoutubeIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/youtube/VideoDetails': typeof YoutubeVideoDetailsRoute
   '/youtube': typeof YoutubeIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/youtube/VideoDetails': typeof YoutubeVideoDetailsRoute
   '/youtube/': typeof YoutubeIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/youtube/VideoDetails' | '/youtube'
+  fullPaths: '/' | '/youtube'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/youtube/VideoDetails' | '/youtube'
-  id: '__root__' | '/' | '/youtube/VideoDetails' | '/youtube/'
+  to: '/' | '/youtube'
+  id: '__root__' | '/' | '/youtube/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  YoutubeVideoDetailsRoute: typeof YoutubeVideoDetailsRoute
   YoutubeIndexRoute: typeof YoutubeIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  YoutubeVideoDetailsRoute: YoutubeVideoDetailsRoute,
   YoutubeIndexRoute: YoutubeIndexRoute,
 }
 
@@ -116,15 +97,11 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/youtube/VideoDetails",
         "/youtube/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/youtube/VideoDetails": {
-      "filePath": "youtube/VideoDetails.tsx"
     },
     "/youtube/": {
       "filePath": "youtube/index.tsx"
