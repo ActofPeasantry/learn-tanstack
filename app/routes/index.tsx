@@ -1,7 +1,6 @@
 import * as fs from "node:fs";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { Link } from "@tanstack/react-router";
 
 const filePath = "count.txt";
 //read count.txt
@@ -63,13 +62,6 @@ function Home() {
         }}
       >
         Subtract 1 to {state}?
-      </button>
-
-      <br />
-      <br />
-
-      <button>
-        <Link to="/youtube"> To youtube thingy page </Link>
       </button>
     </>
   );
