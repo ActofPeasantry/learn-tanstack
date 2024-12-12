@@ -7,12 +7,6 @@ import { createServerFn } from "@tanstack/start";
 import * as fs from "node:fs";
 
 const filePath = "youtube.txt";
-
-const getYoutube = createServerFn({ method: "GET" }).handler(async () => {
-  const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
-  return url.trim();
-});
-
 // Server function to read the file content
 const getYoutubeURL = createServerFn({
   method: "GET",
@@ -40,7 +34,7 @@ const updateURL = createServerFn({ method: "POST" })
 
 export const Route = createFileRoute("/youtube/")({
   component: Youtube,
-  loader: async () => await getYoutube(),
+  loader: async () => await getYoutubeURL(),
 });
 
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
@@ -82,6 +76,8 @@ async function fetchDetails() {
 
 function Youtube() {
   const router = useRouter();
+  const state = Route.useLoaderData();
+
   const queryClient = useQueryClient();
   const [inputURL, setInputURL] = useState("");
 
