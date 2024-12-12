@@ -70,7 +70,7 @@ async function fetchDetails() {
     title: video.title,
     channelTitle: video.channelTitle,
     thumbnail: video.thumbnails.medium.url,
-    publishedAt: formattedDate.toString(),
+    publishedAt: formattedDate,
   };
 }
 
@@ -139,5 +139,3 @@ function Youtube() {
     </>
   );
 }
-
-export default Youtube;
