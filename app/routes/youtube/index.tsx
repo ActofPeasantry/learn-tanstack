@@ -8,13 +8,13 @@ import * as fs from "node:fs";
 
 const filePath = "youtube.txt";
 
-// const getYoutube = createServerFn({ method: "GET" }).handler(async () => {
-//   const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
-//   return url.trim();
-// });
+const getYoutube = createServerFn({ method: "GET" }).handler(async () => {
+  const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
+  return url.trim();
+});
 
 // Server function to read the file content
-const getYoutube = createServerFn({
+const getYoutubeURL = createServerFn({
   method: "GET",
 }).handler(async () => {
   try {
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/youtube/")({
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
 async function fetchDetails() {
-  const url = await getYoutube();
+  const url = await getYoutubeURL();
   const formattedUrl = new URL(url.trim());
   const videoId = formattedUrl.searchParams.get("v");
 
