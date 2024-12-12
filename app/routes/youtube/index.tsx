@@ -6,11 +6,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import * as fs from "node:fs";
 
-const filePath = "youtube.txt";
 // Server function to read the file content
+
 const getYoutubeURL = createServerFn({
   method: "GET",
 }).handler(async () => {
+  const filePath = "/youtube.txt";
   try {
     const url = await fs.promises.readFile(filePath, "utf-8");
     return url.trim(); // Trim whitespace for clean URLs
@@ -29,6 +30,7 @@ const getYoutubeURL = createServerFn({
 const updateURL = createServerFn({ method: "POST" })
   .validator((data: string) => data.trim())
   .handler(async ({ data }) => {
+    const filePath = "/youtube.txt";
     await fs.promises.writeFile(filePath, data.trim(), "utf-8");
   });
 
@@ -94,7 +96,14 @@ function Youtube() {
   });
 
   const handleURL = () => {
-    mutation.mutate({ data: inputURL });
+    mutation.mutate(
+      { data: inputURL },
+      {
+        onError: (error) => {
+          console.error("Update URL failed:", error);
+        },
+      }
+    );
     setInputURL("");
   };
 
