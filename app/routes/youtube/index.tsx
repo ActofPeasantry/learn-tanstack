@@ -8,9 +8,28 @@ import * as fs from "node:fs";
 
 const filePath = "youtube.txt";
 
-const getYoutube = createServerFn({ method: "GET" }).handler(async () => {
-  const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
-  return url.trim();
+// const getYoutube = createServerFn({ method: "GET" }).handler(async () => {
+//   const url = await fs.promises.readFile(filePath, "utf-8").catch(() => "");
+//   return url.trim();
+// });
+
+// Server function to read the file content
+const getYoutube = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  try {
+    const url = await fs.promises.readFile(filePath, "utf-8");
+    return url.trim(); // Trim whitespace for clean URLs
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      // Fallback URL if the file doesn't exist
+      return "https://www.youtube.com/watch?v=zRs58D34OLY";
+    }
+    throw new Error("An unexpected error occurred while reading youtube.txt");
+  }
 });
 
 const updateURL = createServerFn({ method: "POST" })
