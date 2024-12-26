@@ -2,8 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import VideoDetail from "../../components/VideoDetail";
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/start";
 
-const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+// Define the server function to fetch the API key
+export const apiKey = createServerFn().handler(async () => {
+  return import.meta.env.VITE_YOUTUBE_API_KEY;
+});
 
 export const Route = createFileRoute("/youtube/")({
   component: Youtube,
@@ -26,8 +30,10 @@ function Youtube() {
       throw new Error("Invalid YouTube URL or missing video ID");
     }
 
+    // Fetch the API key from the server function
+    const key = await apiKey();
     const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${key}`
     );
 
     if (!response.ok) {
